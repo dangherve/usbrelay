@@ -29,6 +29,7 @@ import time
 import re
 import sys
 import configparser
+import socket
 
 def publish_states(client):
     boards = usbrelay_py.board_details()
@@ -63,7 +64,11 @@ def publish_states(client):
 
 # on_connect signature:
 def on_connect(client, userdata, flags, reason_code, properties):
-  print(f"Connected: reason_code={reason_code}, properties={properties}")
+    if reason_code.is_failure:
+        print(f"Failed to connect: {reason_code}")
+        exit
+    else:
+        print(f"Connected: reason_code={reason_code}, properties={properties}")
 
 def on_message(client, userdata, message):
     msg_state = str(message.payload.decode("utf-8"))
@@ -85,6 +90,12 @@ def on_message(client, userdata, message):
     client.publish(pub_str.format(content[-2],content[-1]), msg_state)
 
 # read the server name or IP address from the command lin
+def hostname_resolves(hostname):
+    try:
+        socket.gethostbyname(hostname)
+        return 1
+    except socket.error:
+        return 0
 
 
 config = configparser.ConfigParser()
@@ -101,6 +112,17 @@ mqtttopic  = config['MQTT']['TOPIC']
 print("MQTT Broker: ", mqttBroker)
 print("MQTT Client: ", clientName)
 
+# Check is the mqtt broker is available
+if hostname_resolves(mqttBroker) == 0:
+    print("Mqtt broker host name",mqttBroker,"unknown - Correct in /etc/usbrelayd.conf")
+    exit()
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.settimeout(2) 
+result = sock.connect_ex((mqttBroker,mqttport))
+if result != 0:
+   print( mqttBroker," Broker is not available")
+   sock.close()
+   exit()
 
 #
 # Count connected usbrelay modules, exit if none 
