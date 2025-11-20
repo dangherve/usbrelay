@@ -61,6 +61,10 @@ def publish_states(client):
             relay += 1
         
 
+# on_connect signature:
+def on_connect(client, userdata, flags, reason_code, properties):
+  print(f"Connected: reason_code={reason_code}, properties={properties}")
+
 def on_message(client, userdata, message):
     msg_state = str(message.payload.decode("utf-8"))
     print("received message: " ,message.topic, msg_state,flush=True)
@@ -113,7 +117,8 @@ else:
 
 if "CallbackAPIVersion" in dir(mqtt):
     # paho-mqtt >= 2.0.0
-    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, clientName)
+    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, clientName)
+    print("Using Version2")
 else:
     # paho-mqtt < 2.0.0
     client = mqtt.Client(clientName)
@@ -122,9 +127,12 @@ if mqttuser or mqttpass:
 if mqttTLS:
     client.tls_set()
 
-client.connect(mqttBroker, port=mqttport) 
-publish_states(client)
+client.on_connect=on_connect 
 client.on_message=on_message 
+client.connect(mqttBroker, port=mqttport,keepalive=60) 
+
+publish_states(client)
+
 while(True):
     client.loop_start()
     time.sleep(60)

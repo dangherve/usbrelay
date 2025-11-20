@@ -569,12 +569,9 @@ docker build -f Dockerfile.usbrelayd -t usbrelayd .
 Run the docker container
 
 Note the container needs to run in privileged mode to access the USB device.
+The default usbrelayd.conf requires a your mqtt broker to have the hostname 'mqtt',substitute an alternative usbrelay.conf file
 ```
-docker run -rm -it --privileged usbrelayd
-```
-To substitute an alternative usbrelay.conf file
-```
-docker run --rm -it --privileged -v "$PWD/myusbrelayd.conf":/etc/usbrelayd.conf usbrelayd
+docker run --rm -it --privileged -v "/path/to/myusbrelayd.conf":/etc/usbrelayd.conf usbrelayd
 ```
 
 
