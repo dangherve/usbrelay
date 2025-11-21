@@ -573,6 +573,10 @@ The default usbrelayd.conf requires a your mqtt broker to have the hostname 'mqt
 ```
 docker run --rm -it --privileged -v "/path/to/myusbrelayd.conf":/etc/usbrelayd.conf usbrelayd
 ```
+To make the usbrelayd container start on boot and restart on failure
+```
+docker run -d --restart unless-stopped --privileged -v "/path/to/myusbrelayd.conf":/etc/usbrelayd.conf usbrelayd
+``` 
 
 
 Enjoy
