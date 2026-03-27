@@ -9,3 +9,5 @@ usbrelay
 .vscode/tasks.json
 
 !buildTools
+
+!.woodpecker
